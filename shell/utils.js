@@ -1398,6 +1398,8 @@ help = shellHelper.help = function (x) {
         print(" [, scope : <object where fields go into javascript global scope >]");
         print(" [, verbose : true]}\n");
         return;
+    }  else if(x == "levenshtein") {
+        print("\nFind matches in the collection using the levenshtein distance using the field and threshold provided");
     } else if (x == "connect") {
         print("\nNormally one specifies the server on the mongo shell command line.  Run mongo --help to see those options.");
         print("Additional connections may be opened:\n");

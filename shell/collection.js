@@ -51,6 +51,7 @@ DBCollection.prototype.help = function () {
     print("\tdb." + shortName + ".getIndexes()");
     print("\tdb." + shortName + ".group( { key : ..., initial: ..., reduce : ...[, cond: ...] } )");
     print("\tdb." + shortName + ".mapReduce( mapFunction , reduceFunction , <optional params> )");
+    print("\tdb." + shortName + ".levenshtein( sourceTerm , field, threshold [, { level:[\"word\"| \"sentence\"], separators:\" \" }] )");
     print("\tdb." + shortName + ".remove(query)");
     print("\tdb." + shortName + ".renameCollection( newName , <dropTarget> ) renames the collection.");
     print("\tdb." + shortName + ".runCommand( name , <options> ) runs a db command with the given name where the first param is the collection name");
@@ -606,6 +607,37 @@ DBCollection.prototype.mapReduce = function( map , reduce , optionsOrOutString )
         throw "map reduce failed:" + tojson(raw);
     }
     return new MapReduceResult( this._db , raw );
+
+}
+
+DBCollection.prototype.levenshtein = function( sourceTerm , field, threshold, opts ){
+    var c = { levenshtein : this._shortName , sourceTerm : sourceTerm , field : field, threshold : threshold };
+    opts = opts || {"level":"word"};
+
+    if(!opts["level"] || opts["level"] === "word") {
+        c["word"] = true;
+        c["sentence"] = false;
+    } else {
+        c["word"] = false;
+        c["sentence"] = true;    
+    }
+
+    c["separators"] = (opts["separators"]||".,:; ");
+
+    if(opts["limit"]) {
+        c["limit"] = opts["limit"];
+    }
+    if(opts["outputField"]) {
+        c["outputField"] = opts["outputField"];
+    }
+
+    var raw = this._db.runCommand( c );
+    if ( ! raw.ok ){
+        __mrerror__ = raw;
+        throw "tm matches failed:" + tojson(raw);
+    }
+    // @todo this may be formatted
+    return tojson(raw);
 
 }
 
